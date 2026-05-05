@@ -1,180 +1,20 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Smart Team Scheduler</title>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <style>
-    *{box-sizing:border-box;margin:0;padding:0;font-family:Arial,sans-serif}body{background:#f4f6f9;color:#1f2937;padding:20px}.container{max-width:1400px;margin:auto}.header{background:linear-gradient(135deg,#111827,#2563eb);color:#fff;padding:25px;border-radius:18px;margin-bottom:25px;box-shadow:0 8px 25px rgba(0,0,0,.15)}.header h1{font-size:30px;margin-bottom:8px}.grid{display:grid;grid-template-columns:repeat(12,1fr);gap:20px}.card{background:#fff;padding:20px;border-radius:16px;box-shadow:0 4px 15px rgba(0,0,0,.08);margin-bottom:20px}.col-4{grid-column:span 4}.col-6{grid-column:span 6}.col-12{grid-column:span 12}h2{font-size:20px;margin-bottom:15px;color:#111827}label{display:block;font-weight:700;font-size:13px;margin:10px 0 5px}input,select{width:100%;padding:11px;border:1px solid #d1d5db;border-radius:10px;outline:none}button{border:none;padding:11px 14px;border-radius:10px;cursor:pointer;font-weight:700;margin-top:12px}.btn-primary{background:#2563eb;color:#fff}.btn-dark{background:#111827;color:#fff}.btn-green{background:#16a34a;color:#fff}.btn-red{background:#dc2626;color:#fff}.btn-orange{background:#f97316;color:#fff}.btn-gray{background:#6b7280;color:#fff}.table-wrapper,.planning-matrix-wrapper{overflow-x:auto}.planning-matrix-wrapper{border-radius:14px;border:1px solid #e5e7eb;margin-top:10px}table{width:100%;border-collapse:collapse;margin-top:10px;font-size:14px}th,td{border-bottom:1px solid #e5e7eb;padding:12px;text-align:left;vertical-align:top}th{background:#f9fafb;font-weight:700}.badge{padding:5px 9px;border-radius:20px;font-size:12px;font-weight:700;display:inline-block}.good{background:#dcfce7;color:#166534}.medium{background:#fef9c3;color:#854d0e}.bad{background:#fee2e2;color:#991b1b}.planning-matrix{min-width:1100px;border-collapse:collapse;margin-top:0;font-size:13px}.planning-matrix th,.planning-matrix td{border:1px solid #d1d5db;text-align:center;padding:10px;font-weight:700;white-space:nowrap}.planning-matrix th{background:#111827;color:#fff;position:sticky;top:0;z-index:2}.planning-matrix .member-col{background:#f3f4f6;color:#111827;position:sticky;left:0;z-index:3;text-align:left;min-width:150px}.planning-matrix th.member-col{background:#111827;color:#fff}.cell-shift1{background:#b8f7a7;color:#064e3b}.cell-shift2{background:#57b4d0;color:#061b2b}.cell-off{background:#f8b84e;color:#fff}.cell-empty{background:#f9fafb;color:#9ca3af}.shift-select{width:100%;min-width:115px;border:none;background:transparent;font-weight:700;text-align:center;cursor:pointer;outline:none}.cell-shift1 .shift-select{color:#064e3b}.cell-shift2 .shift-select{color:#061b2b}.cell-off .shift-select{color:#fff}.edit-hint{margin-top:10px;background:#eff6ff;color:#1d4ed8;padding:10px 12px;border-radius:12px;font-size:13px;font-weight:700}.legend{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px;font-size:13px}.legend span{display:inline-flex;align-items:center;gap:6px;font-weight:700}.legend i{width:18px;height:18px;border-radius:4px;display:inline-block}.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:15px}.kpi{background:#f9fafb;padding:15px;border-radius:14px;border-left:5px solid #2563eb}.kpi span{font-size:13px;color:#6b7280}.kpi strong{display:block;font-size:24px;margin-top:6px}.mini-text{font-size:13px;color:#6b7280;margin-top:8px;line-height:1.5}.alert{padding:12px;border-radius:12px;background:#fff7ed;color:#9a3412;margin-top:10px;font-size:14px}.team-chip{display:inline-block;background:#eef2ff;color:#3730a3;padding:5px 10px;border-radius:999px;margin:3px;font-size:12px}.checkbox-list{background:#f9fafb;border:1px solid #e5e7eb;padding:10px;border-radius:12px;max-height:140px;overflow-y:auto}.checkbox-item{display:flex;align-items:center;gap:8px;padding:6px 2px;font-size:14px;font-weight:700}.checkbox-item input{width:auto}.team-section-title{margin-top:20px;margin-bottom:8px;padding:10px 12px;border-radius:12px;background:#111827;color:#fff;font-size:16px}canvas{max-height:320px}@media(max-width:900px){.col-4,.col-6,.col-12{grid-column:span 12}.kpi-grid{grid-template-columns:repeat(2,1fr)}}@media(max-width:600px){.kpi-grid{grid-template-columns:1fr}body{padding:12px}}
-  </style>
-</head>
-<body>
-  <div class="container">
-    <div class="header"><h1>Smart Team Scheduler</h1><p>Gestion flexible des teams, génération planning 7/7 avec 2 shifts, 5 jours de travail et 2 jours OFF consécutifs.</p></div>
-    <div class="grid">
-      <div class="card col-4"><h2>1. Ajouter un membre</h2><label>Nom du membre</label><input id="memberName" placeholder="Ex: Ali"><label>Niveau</label><select id="memberLevel"><option value="Good">Good</option><option value="Moyen">Moyen</option><option value="Bad">Bad</option></select><label>Team</label><select id="memberTeam"></select><label>Préférence shift</label><select id="memberPreference"><option value="Any">Any</option><option value="11-19">11h-19h</option><option value="16-00">16h-00h</option></select><button class="btn-primary" onclick="addMember()">Ajouter membre</button><p class="mini-text">Chaque membre sera utilisé uniquement dans le planning de sa team.</p></div>
-      <div class="card col-4"><h2>2. Créer une team</h2><label>Nom de la team</label><input id="teamName" placeholder="Ex: Warming, Send, CPM"><button class="btn-dark" onclick="addTeam()">Créer team</button><div id="teamList" style="margin-top:15px"></div></div>
-      <div class="card col-4"><h2>3. Générer planning</h2><label>Choisir les teams à générer</label><div id="teamCheckboxes" class="checkbox-list"></div><label>Nombre de membres par shift 11h-19h</label><input id="shift1Count" type="number" min="1" value="2"><label>Nombre de membres par shift 16h-00h</label><input id="shift2Count" type="number" min="1" value="2"><label>Mois à analyser</label><input id="monthInput" type="month"><button class="btn-green" onclick="generatePlanning()">Générer planning</button> <button class="btn-orange" onclick="exportCSV()">Exporter CSV</button><div class="alert">Règles : 5/7 travail, OFF seulement Mardi/Mercredi, Jeudi/Vendredi ou Samedi/Dimanche.</div></div>
-    </div>
-    <div class="card col-12"><h2>Liste des membres</h2><div class="table-wrapper"><table><thead><tr><th>Nom</th><th>Niveau</th><th>Team</th><th>Préférence</th><th>Action</th></tr></thead><tbody id="membersTable"></tbody></table></div></div>
-    <div class="card col-12"><h2>Dashboard mensuel</h2><div class="kpi-grid"><div class="kpi"><span>Total membres team</span><strong id="kpiMembers">0</strong></div><div class="kpi"><span>Total shifts</span><strong id="kpiShifts">0</strong></div><div class="kpi"><span>Membre le plus chargé</span><strong id="kpiTop">-</strong></div><div class="kpi"><span>Membre le moins chargé</span><strong id="kpiLow">-</strong></div></div></div>
-    <div class="grid"><div class="card col-6"><h2>Graphique : shifts par membre</h2><canvas id="shiftChart"></canvas></div><div class="card col-6"><h2>Graphique : Good / Moyen / Bad</h2><canvas id="levelChart"></canvas></div></div>
-    <div class="card col-12"><h2>Planning généré par membre et par date</h2><div class="legend"><span><i class="cell-shift1"></i> 11:00 - 19:00</span><span><i class="cell-shift2"></i> 16:00 - 00:00</span><span><i class="cell-off"></i> OFF / Récup</span></div><div class="edit-hint">Après génération, change le shift directement dans chaque cellule.</div><div class="planning-matrix-wrapper" id="planningMatrixWrapper"><table class="planning-matrix" id="planningMatrix"></table></div></div>
-    <div class="card col-12"><h2>Analyse par membre</h2><div class="table-wrapper"><table><thead><tr><th>Membre</th><th>Niveau</th><th>Total shifts</th><th>Shift 11h-19h</th><th>Shift 16h-00h</th><th>Jours OFF</th><th>Taux de présence</th></tr></thead><tbody id="analysisTable"></tbody></table></div></div>
-  </div>
-
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script>
-    const SUPABASE_URL = "https://cuhgsufizodvnhehyugt.supabase.co";
-    const SUPABASE_KEY = "sb_publishable_67f0fUCajy4ikrzKGlI7Ag_P9pVRny3";
-    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-    let teams = [];
-    let members = [];
-    let currentPlanningsByTeam = {};
-    let shiftChart = null;
-    let levelChart = null;
-    const dayNames = ['Dimanche','Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi'];
-    const offGroups = [['Mardi','Mercredi'],['Jeudi','Vendredi'],['Samedi','Dimanche']];
-
-    async function loadFromSupabase(){
-      const {data:teamsData,error:teamsError}=await supabaseClient.from('teams').select('*').order('created_at',{ascending:true});
-      const {data:membersData,error:membersError}=await supabaseClient.from('members').select('*, teams(name)').order('created_at',{ascending:true});
-      if(teamsError||membersError){console.error(teamsError||membersError);alert('Erreur Supabase. Vérifie RLS/API.');return;}
-      teams=(teamsData||[]).map(t=>({id:t.id,name:t.name}));
-      members=(membersData||[]).map(m=>({id:m.id,name:m.name,level:m.level,team_id:m.team_id,team:m.teams?.name||'',preference:m.preference||'Any'}));
-      renderTeams();renderMembers();updateCharts([],[]);
+{
+  "name": "stackblitz-starters-awmagtvy",
+  "lockfileVersion": 3,
+  "requires": true,
+  "packages": {
+    "": {
+      "dependencies": {
+        "servor": "^4.0.2"
+      }
+    },
+    "node_modules/servor": {
+      "version": "4.0.2",
+      "resolved": "https://registry.npmjs.org/servor/-/servor-4.0.2.tgz",
+      "integrity": "sha512-MlmQ5Ntv4jDYUN060x/KEmN7emvIqKMZ9OkM+nY8Bf2+KkyLmGsTqWLyAN2cZr5oESAcH00UanUyyrlS1LRjFw==",
+      "bin": {
+        "servor": "cli.js"
+      }
     }
-
-    async function addTeam(){
-      const name=document.getElementById('teamName').value.trim();
-      if(!name)return alert('Entrez le nom de la team');
-      if(teams.some(t=>t.name.toLowerCase()===name.toLowerCase()))return alert('Cette team existe déjà');
-      const {error}=await supabaseClient.from('teams').insert({name});
-      if(error){console.error(error);return alert('Erreur création team');}
-      document.getElementById('teamName').value='';
-      await loadFromSupabase();
-    }
-
-    async function addMember(){
-      const name=document.getElementById('memberName').value.trim();
-      const level=document.getElementById('memberLevel').value;
-      const teamId=document.getElementById('memberTeam').value;
-      const preference=document.getElementById('memberPreference').value;
-      if(!name)return alert('Entrez le nom du membre');
-      if(!teamId)return alert('Crée ou choisis une team d’abord');
-      const {error}=await supabaseClient.from('members').insert({name,level,team_id:teamId,preference});
-      if(error){console.error(error);return alert('Erreur ajout membre');}
-      document.getElementById('memberName').value='';
-      await loadFromSupabase();
-    }
-
-    async function deleteMember(id){
-      if(!confirm('Supprimer ce membre ?'))return;
-      const {error}=await supabaseClient.from('members').delete().eq('id',id);
-      if(error){console.error(error);return alert('Erreur suppression');}
-      await loadFromSupabase();
-    }
-
-    function renderTeams(){
-      const memberTeam=document.getElementById('memberTeam');
-      memberTeam.innerHTML=teams.map(t=>`<option value="${t.id}">${t.name}</option>`).join('');
-      document.getElementById('teamList').innerHTML=teams.map(t=>`<span class="team-chip">${t.name}</span>`).join('')||'<p class="mini-text">Aucune team. Crée une team d’abord.</p>';
-      document.getElementById('teamCheckboxes').innerHTML=teams.map((t,i)=>`<label class="checkbox-item"><input type="checkbox" class="team-check" value="${t.name}" ${i===0?'checked':''}> ${t.name} <span class="mini-text">(${members.filter(m=>m.team===t.name).length} membres)</span></label>`).join('')||'<p class="mini-text">Aucune team.</p>';
-    }
-
-    function renderMembers(){
-      document.getElementById('membersTable').innerHTML=members.map(m=>`<tr><td><strong>${m.name}</strong></td><td>${levelBadge(m.level)}</td><td>${m.team}</td><td>${m.preference}</td><td><button class="btn-red" onclick="deleteMember('${m.id}')">Supprimer</button></td></tr>`).join('');
-    }
-
-    function levelBadge(level){if(level==='Good')return'<span class="badge good">Good</span>';if(level==='Moyen')return'<span class="badge medium">Moyen</span>';return'<span class="badge bad">Bad</span>';}
-
-    function getDaysInMonth(monthValue){
-      const [year,month]=monthValue.split('-').map(Number);const days=[];const last=new Date(year,month,0).getDate();
-      for(let d=1;d<=last;d++){const date=new Date(year,month-1,d);days.push({date:`${String(d).padStart(2,'0')}/${String(month).padStart(2,'0')}/${year}`,day:dayNames[date.getDay()]});}
-      return days;
-    }
-
-    function generatePlanning(){
-      const selectedTeams=Array.from(document.querySelectorAll('.team-check:checked')).map(cb=>cb.value);
-      const month=document.getElementById('monthInput').value;
-      const shift1Count=parseInt(document.getElementById('shift1Count').value||'1',10);
-      const shift2Count=parseInt(document.getElementById('shift2Count').value||'1',10);
-      if(!selectedTeams.length)return alert('Choisissez au moins une team.');
-      if(!month)return alert('Choisissez un mois.');
-      currentPlanningsByTeam={};
-      selectedTeams.forEach(team=>{currentPlanningsByTeam[team]=generatePlanningForTeam(team,month,shift1Count,shift2Count);});
-      renderAllTeamPlannings();
-      const first=currentPlanningsByTeam[selectedTeams[0]];renderAnalysis(first.stats,first.teamMembers,first.days.length);
-    }
-
-    function generatePlanningForTeam(team,month,shift1Count,shift2Count){
-      const teamMembers=members.filter(m=>m.team===team);
-      if(teamMembers.length<shift1Count+shift2Count)alert(`Attention : ${team} contient ${teamMembers.length} membres, demande ${shift1Count+shift2Count}/jour.`);
-      const days=getDaysInMonth(month);const stats={};const memberOffGroup={};const levelOrder={Good:1,Moyen:2,Bad:3};
-      teamMembers.forEach((m,i)=>{stats[m.name]={total:0,shift1:0,shift2:0,off:0,level:m.level};memberOffGroup[m.id]=offGroups[i%offGroups.length];});
-      const planning=days.map(day=>{
-        const off=teamMembers.filter(m=>memberOffGroup[m.id].includes(day.day));
-        let available=teamMembers.filter(m=>!memberOffGroup[m.id].includes(day.day));
-        available.sort((a,b)=>(stats[a.name].total-stats[b.name].total)||(levelOrder[a.level]-levelOrder[b.level]));
-        const pick=(list,pref,limit)=>{const preferred=list.filter(m=>m.preference===pref||m.preference==='Any');const others=list.filter(m=>!preferred.includes(m));return [...preferred,...others].slice(0,limit);};
-        const shift1=pick(available,'11-19',shift1Count);available=available.filter(m=>!shift1.includes(m));
-        const shift2=pick(available,'16-00',shift2Count);
-        shift1.forEach(m=>{stats[m.name].total++;stats[m.name].shift1++;});shift2.forEach(m=>{stats[m.name].total++;stats[m.name].shift2++;});off.forEach(m=>stats[m.name].off++);
-        return{date:day.date,day:day.day,shift1,shift2,off};
-      });
-      return{team,planning,stats,teamMembers,days};
-    }
-
-    function renderAllTeamPlannings(){
-      const wrapper=document.getElementById('planningMatrixWrapper');const teamsGenerated=Object.keys(currentPlanningsByTeam);
-      if(!teamsGenerated.length){wrapper.innerHTML='<table class="planning-matrix" id="planningMatrix"></table>';return;}
-      wrapper.innerHTML=teamsGenerated.map(team=>{const data=currentPlanningsByTeam[team];return`<div class="team-section-title">Planning Team : ${team}</div><table class="planning-matrix"><thead><tr><th class="member-col">Membre</th>${data.planning.map(r=>`<th>${r.day}<br>${r.date}</th>`).join('')}</tr></thead><tbody>${data.teamMembers.map(member=>`<tr><td class="member-col">${member.name}</td>${data.planning.map((row,dayIndex)=>editableCell(team,member,row,dayIndex)).join('')}</tr>`).join('')}</tbody></table>`;}).join('');
-    }
-
-    function editableCell(team,member,row,dayIndex){
-      const value=row.shift1.some(m=>m.id===member.id)?'11-19':row.shift2.some(m=>m.id===member.id)?'16-00':row.off.some(m=>m.id===member.id)?'OFF':'EMPTY';
-      const cls=value==='11-19'?'cell-shift1':value==='16-00'?'cell-shift2':value==='OFF'?'cell-off':'cell-empty';
-      return`<td class="${cls}"><select class="shift-select" onchange="changeCellShift('${team}',${dayIndex},'${member.id}',this.value)"><option value="11-19" ${value==='11-19'?'selected':''}>11:00 - 19:00</option><option value="16-00" ${value==='16-00'?'selected':''}>16:00 - 00:00</option><option value="OFF" ${value==='OFF'?'selected':''}>00:00 - 00:00</option><option value="EMPTY" ${value==='EMPTY'?'selected':''}>-</option></select></td>`;
-    }
-
-    function changeCellShift(team,dayIndex,memberId,newValue){
-      const data=currentPlanningsByTeam[team];if(!data)return;const member=data.teamMembers.find(m=>m.id===memberId);const row=data.planning[dayIndex];
-      row.shift1=row.shift1.filter(m=>m.id!==memberId);row.shift2=row.shift2.filter(m=>m.id!==memberId);row.off=row.off.filter(m=>m.id!==memberId);
-      if(newValue==='11-19')row.shift1.push(member);if(newValue==='16-00')row.shift2.push(member);if(newValue==='OFF')row.off.push(member);
-      recalculateStats(team);renderAllTeamPlannings();renderAnalysis(data.stats,data.teamMembers,data.days.length);
-    }
-
-    function recalculateStats(team){
-      const data=currentPlanningsByTeam[team];const stats={};data.teamMembers.forEach(m=>stats[m.name]={total:0,shift1:0,shift2:0,off:0,level:m.level});
-      data.planning.forEach(r=>{r.shift1.forEach(m=>{stats[m.name].total++;stats[m.name].shift1++;});r.shift2.forEach(m=>{stats[m.name].total++;stats[m.name].shift2++;});r.off.forEach(m=>stats[m.name].off++);});data.stats=stats;
-    }
-
-    function renderAnalysis(stats,teamMembers,totalDays){
-      const rows=teamMembers.map(m=>({name:m.name,level:m.level,total:stats[m.name].total,shift1:stats[m.name].shift1,shift2:stats[m.name].shift2,off:stats[m.name].off,rate:Math.round((stats[m.name].total/totalDays)*100)}));
-      document.getElementById('analysisTable').innerHTML=rows.map(r=>`<tr><td><strong>${r.name}</strong></td><td>${levelBadge(r.level)}</td><td>${r.total}</td><td>${r.shift1}</td><td>${r.shift2}</td><td>${r.off}</td><td>${r.rate}%</td></tr>`).join('');
-      const totalShifts=rows.reduce((s,r)=>s+r.total,0);const top=rows.length?rows.reduce((a,b)=>a.total>b.total?a:b):null;const low=rows.length?rows.reduce((a,b)=>a.total<b.total?a:b):null;
-      document.getElementById('kpiMembers').textContent=rows.length;document.getElementById('kpiShifts').textContent=totalShifts;document.getElementById('kpiTop').textContent=top?`${top.name} (${top.total})`:'-';document.getElementById('kpiLow').textContent=low?`${low.name} (${low.total})`:'-';updateCharts(rows,teamMembers);
-    }
-
-    function updateCharts(rows,teamMembers){
-      const shiftCtx=document.getElementById('shiftChart');const levelCtx=document.getElementById('levelChart');if(shiftChart)shiftChart.destroy();if(levelChart)levelChart.destroy();
-      shiftChart=new Chart(shiftCtx,{type:'bar',data:{labels:rows.map(r=>r.name),datasets:[{label:'Total shifts',data:rows.map(r=>r.total),borderWidth:1}]},options:{responsive:true,scales:{y:{beginAtZero:true}}}});
-      const counts={Good:0,Moyen:0,Bad:0};teamMembers.forEach(m=>counts[m.level]++);levelChart=new Chart(levelCtx,{type:'pie',data:{labels:['Good','Moyen','Bad'],datasets:[{data:[counts.Good,counts.Moyen,counts.Bad]}]},options:{responsive:true}});
-    }
-
-    function exportCSV(){
-      if(!Object.keys(currentPlanningsByTeam).length)return alert('Générez un planning avant export.');
-      let csv='Team,Date,Jour,Shift 11h-19h,Shift 16h-00h,OFF
-';
-      Object.keys(currentPlanningsByTeam).forEach(team=>{currentPlanningsByTeam[team].planning.forEach(row=>{csv+=`${team},${row.date},${row.day},"${row.shift1.map(m=>m.name).join(' - ')}","${row.shift2.map(m=>m.name).join(' - ')}","${row.off.map(m=>m.name).join(' - ')}"
-`;});});
-      const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});const link=document.createElement('a');link.href=URL.createObjectURL(blob);link.download='planning_team.csv';link.click();
-    }
-
-    function init(){const now=new Date();document.getElementById('monthInput').value=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;loadFromSupabase();}
-    init();
-  </script>
-</body>
-</html>
+  }
+}
