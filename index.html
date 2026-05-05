@@ -500,7 +500,56 @@
     </div>
   </div>
 
-  <script>
+  <!-- Supabase -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script>
+  const SUPABASE_URL = "https://cuhgsufizodvnhehyugt.supabase.co";
+  const SUPABASE_KEY = "sb_publishable_67f0fUCajy4ikrzKGlI7Ag_P9pVRny3";
+
+  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  async function loadFromSupabase() {
+    const { data: teamsData } = await supabase.from('teams').select('*');
+    const { data: membersData } = await supabase.from('members').select('*');
+
+    if (teamsData && teamsData.length) {
+      teams = teamsData.map(t => t.name);
+    }
+
+    if (membersData && membersData.length) {
+      members = membersData.map(m => ({
+        id: m.id,
+        name: m.name,
+        level: m.level,
+        team: teamsData.find(t => t.id === m.team_id)?.name || '',
+        preference: m.preference
+      }));
+    }
+
+    renderTeams();
+    renderMembers();
+  }
+
+  async function saveMemberToSupabase(member) {
+    const team = await supabase.from('teams').select('*').eq('name', member.team).single();
+
+    let teamId = team.data?.id;
+
+    if (!teamId) {
+      const { data } = await supabase.from('teams').insert({ name: member.team }).select().single();
+      teamId = data.id;
+    }
+
+    await supabase.from('members').insert({
+      name: member.name,
+      level: member.level,
+      team_id: teamId,
+      preference: member.preference
+    });
+  }
+
+
     // Load from localStorage or default
 let teams = JSON.parse(localStorage.getItem('teams')) || ['Warming', 'Send', 'CPM'];
     let members = JSON.parse(localStorage.getItem('members')) || [
@@ -571,7 +620,7 @@ let teams = JSON.parse(localStorage.getItem('teams')) || ['Warming', 'Send', 'CP
       renderTeams();
     }
 
-    function addMember() {
+    async function addMember() {
       const name = document.getElementById('memberName').value.trim();
       const level = document.getElementById('memberLevel').value;
       const team = document.getElementById('memberTeam').value;
@@ -579,23 +628,26 @@ let teams = JSON.parse(localStorage.getItem('teams')) || ['Warming', 'Send', 'CP
 
       if (!name) return alert('Entrez le nom du membre');
 
-      members.push({
+      const newMember = {
         id: Date.now(),
         name,
         level,
         team,
         preference
-      });
+      };
+
+      members.push(newMember);
+
+      // Save to Supabase
+      await saveMemberToSupabase(newMember);
 
       document.getElementById('memberName').value = '';
       renderMembers();
+      renderTeams();
       saveData();
     }
 
-    function deleteMember(id) {
-      members = members.filter(m => m.id !== id);
-      saveData();
-      renderMembers();
+    function deleteMemberembers();
       saveData();
     }
 
@@ -933,9 +985,7 @@ let teams = JSON.parse(localStorage.getItem('teams')) || ['Warming', 'Send', 'CP
 ';
       Object.keys(currentPlanningsByTeam).forEach(team => {
         currentPlanningsByTeam[team].planning.forEach(row => {
-          csv += `${team},${row.date},${row.day},"${row.shift1.map(m => m.name).join(' - ')}","${row.shift2.map(m => m.name).join(' - ')}","${row.off.map(m => m.name).join(' - ')}"
-`;
-        });
+          c        });
       });
 
       const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
@@ -946,6 +996,7 @@ let teams = JSON.parse(localStorage.getItem('teams')) || ['Warming', 'Send', 'CP
     }
 
     init();
+loadFromSupabase();
   </script>
 </body>
 </html>
